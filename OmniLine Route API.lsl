@@ -31,4 +31,9 @@ default {
 			}
 		}
 	}
+	link_message(integer sender_num, integer num, string str, key id) {
+		if (str == "stop_chime") {
+			// do something here
+		}
+	}
 }
