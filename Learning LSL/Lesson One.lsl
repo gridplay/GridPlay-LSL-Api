@@ -20,6 +20,7 @@ default {
 // new state
 state tutorial {
 	state_entry() {
+		WHITE = <0.5,0.5,0.5>;
 		llSetText("I am a tutorial", WHITE, alpha);
 		llSetTimerEvent(30.0); // we set the timer to 30 seconds
 	}
