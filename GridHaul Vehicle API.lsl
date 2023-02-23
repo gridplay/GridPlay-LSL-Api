@@ -1,30 +1,11 @@
 /*
 ** DISCLIAMER **
 ** VENKELLIE WILL NOT HELP IF THE BASE CODE OF THIS SCRIPT HAS BEEN MODIFIED **
-*
-* 1.1.0
-* FindSitTarget() fix by CarlaWetter
-* Sit attachment fix by CarlaWetter, enhanced by Venkellie
-* Max GridGram calculations by Venkellie
-* amphibian added by Venkellie
-* API cleanup by Venkellie
-* Szym Paladin compatibility by Venkellie
-* Max GG message by CarlaWetter
-*
-* 1.1.0a
-* Disclaimer added
-* Fix Amphibian
-* Fix OPENAPI data handling by Venkellie
-OPENAPI is only triggered now if the sender is NOT owned
-by the owner of this script
-*
-* 1.1.0b
-* preprocessor fix by CarlaWetter, sorry about that
 */
 /*
-vt = vehicle type = grid grams
+vt = vehicle type = suggested grid grams
 ------------------------------
-ap = Airport = 20
+ap = Airplane = 20
 hp = Helipad = 5
 rd = Road = 4
 ft = Foot = 2
@@ -41,6 +22,7 @@ or -1 to use the cubic meter calculation that is in the state_entry event
 list box = llGetBoundingBox(llGetKey());
 vector vsize = llList2Vector(box, 1) - llList2Vector(box, 0);
 maxgg = (llRound(vsize.x) + llRound(vsize.y) + llRound(vsize.z));
+maxgg += llGetNumberOfPrims();
 */
 integer maxgg = -1;
 /* channel number for link_message */
@@ -95,6 +77,20 @@ apisay(string uri, list other) {
     }
     llRegionSayTo(hudkey,ghchan,bs);
 }
+string NumberFormat(integer number) {
+    string output;
+    integer x = 0;
+    string numberString = (string)number;
+    integer numberStringLength = llStringLength(numberString);
+    integer z = (numberStringLength + 2) % 3;
+    for(;x < numberStringLength; ++x) {
+        output += llGetSubString(numberString, x, x);
+        if ((x % 3) == z && x != (numberStringLength - 1)) {
+            output += ",";
+        }
+    }
+    return output;
+}
 default {
     state_entry() {
         target = FindSitTarget(); // scan for first valid sit target in linkest on init
@@ -102,41 +98,37 @@ default {
             list box = llGetBoundingBox(llGetKey());
             vector vsize = llList2Vector(box, 1) - llList2Vector(box, 0);
             maxgg = (llRound(vsize.x) + llRound(vsize.y) + llRound(vsize.z));
+            maxgg += (llGetNumberOfPrims() / 2);
         }
-        llOwnerSay("Maximal cargo capcity: " + (string)maxgg);
+        llOwnerSay("Maximum cargo capcity: "+NumberFormat(maxgg)+" GridGrams");
         owner = llGetOwner();
         llListen(ghchan,"","","");
         llListen(OPENAPI,"","","");
     }
     listen(integer chan, string name, key id, string msg) {
-        list pdetails = llGetParcelDetails(llGetPos(),[PARCEL_DETAILS_ID]);
         if (chan == OPENAPI && llGetOwnerKey(id) != owner) {
             string parcel_uuid = llJsonGetValue(msg,["parcel_uuid"]);
-            if ((key)parcel_uuid == llList2Key(pdetails,0)) {
-                string vuri = llJsonGetValue(msg,["uri"]);
-                string cargo = llJsonGetValue(msg,["cargo"]);
-                if (vuri == "loading") {
-                    loading(cargo);
-                }
-                if (vuri == "unloading") {
-                    unloading(cargo);
-                }
+            string vuri = llJsonGetValue(msg,["uri"]);
+            string cargo = llJsonGetValue(msg,["cargo"]);
+            if (vuri == "loading") {
+                loading(cargo);
+            }
+            if (vuri == "unloading") {
+                unloading(cargo);
             }
         }
         if (chan == ghchan && llGetOwnerKey(id) == owner) {
             string bs = llBase64ToString(msg);
             string json = llUnescapeURL(bs);
             string parcel_uuid = llJsonGetValue(json,["parcel_uuid"]);
-            if ((key)parcel_uuid == llList2Key(pdetails,0)) {
-                if (llJsonValueType(json,["uri"]) != JSON_INVALID) {
-                    string vuri = llJsonGetValue(json,["uri"]);
-                    string cargo = llJsonGetValue(json,["cargo"]);
-                    if (vuri == "loading") {
-                        loading(cargo);
-                    }
-                    if (vuri == "unloading") {
-                        unloading(cargo);
-                    }
+            if (llJsonValueType(json,["uri"]) != JSON_INVALID) {
+                string vuri = llJsonGetValue(json,["uri"]);
+                string cargo = llJsonGetValue(json,["cargo"]);
+                if (vuri == "loading") {
+                    loading(cargo);
+                }
+                if (vuri == "unloading") {
+                    unloading(cargo);
                 }
             }
         }
