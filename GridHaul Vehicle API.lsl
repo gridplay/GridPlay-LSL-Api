@@ -100,7 +100,7 @@ default {
             maxgg = (llRound(vsize.x) + llRound(vsize.y) + llRound(vsize.z));
             maxgg += (llGetNumberOfPrims() / 2);
         }
-        llOwnerSay("Maximum cargo capcity: "+NumberFormat(maxgg)+" GridGrams");
+        llOwnerSay("Maximum cargo capacity: "+NumberFormat(maxgg)+" GridGrams");
         owner = llGetOwner();
         llListen(ghchan,"","","");
         llListen(OPENAPI,"","","");
