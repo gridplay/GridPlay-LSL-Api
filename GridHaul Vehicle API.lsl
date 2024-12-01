@@ -13,6 +13,10 @@ rr = RailRoad = 12
 bo = Boat = 15
 sa = Space = 40
 am = Amphibian = 39 (road + boat + airplane)
+
+replace the two letters below from the list above.
+ie. replace rd with ap for a airplane
+string vt = "ap";
 */
 string vt = "rd";
 /*
@@ -27,7 +31,8 @@ maxgg += llGetNumberOfPrims();
 integer maxgg = -1;
 /* channel number for link_message */
 integer lmchan = 30;
-// OPEN API channel
+// OPEN API channel developers can send data to this script
+// also listen on this channel for json data from the HUD
 integer OPENAPI = 47434285;
 // We should not assume that every possible vehicle has a valid llAcvatarOnSitTarget() (CarlaWetter)
 integer target;
@@ -48,6 +53,7 @@ integer FindSitTarget() {
     return target;
 }
 // Back to our regular schedule
+// this sends a link message to any script in the linkset listening for integer of lmchan
 sendlink(list jl) {
     string json = llList2Json(JSON_OBJECT,jl);
     llMessageLinked(LINK_SET,lmchan,json,NULL_KEY);
@@ -65,9 +71,11 @@ loading(string cargo) {
     sendlink(jl);
 }
 /* dont worry about everything below */
-integer ghchan = -47434285; // GRIDHAUL on any phone keypad
-key owner;
-key hudkey = NULL_KEY;
+integer ghchan = -47434285; // GRIDHAUL on any phone keypad, this chats with the HUD
+key owner; // owner of the vehicle
+key hudkey = NULL_KEY; // hud's prim UUID key
+
+// this sends to the HUD
 apisay(string uri, list other) {
     other += ["uri",uri];
     string js = llList2Json(JSON_OBJECT,other);
@@ -77,6 +85,7 @@ apisay(string uri, list other) {
     }
     llRegionSayTo(hudkey,ghchan,bs);
 }
+// converts 1000 to 1,000
 string NumberFormat(integer number) {
     string output;
     integer x = 0;
