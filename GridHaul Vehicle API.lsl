@@ -107,7 +107,7 @@ default {
             list box = llGetBoundingBox(llGetKey());
             vector vsize = llList2Vector(box, 1) - llList2Vector(box, 0);
             maxgg = (llRound(vsize.x) + llRound(vsize.y) + llRound(vsize.z));
-            maxgg += (llGetNumberOfPrims() / 2);
+            maxgg += llGetNumberOfPrims();
         }
         llOwnerSay("Maximum cargo capacity: "+NumberFormat(maxgg)+" GridGrams");
         owner = llGetOwner();
