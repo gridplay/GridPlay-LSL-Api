@@ -8,7 +8,7 @@ default {
 		// lets put a message in text above this prim
 		llSetText("Hello mom", WHITE, alpha);
 	}
-	touch_end() {
+	touch_end(integer d) {
 		// check to see if the toucher is the owner of this prim
 		if (llDetectedKey(0) == llGetOwner()) {
 			// lets switch state
